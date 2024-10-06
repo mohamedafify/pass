@@ -7,9 +7,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:passwordstore/src/constants/constants.dart';
+import 'package:passwordstore/src/features/git/git.dart';
 
 part 'services.dart';
 part 'user.dart';
+part 'repo.dart';
 
 class Github {
 	static Github? _instance;
@@ -94,7 +96,29 @@ class Github {
 	}
 
 	Future<GithubUser?> getUser() async {
-		return await _service._getUser();
+		Response response = await _service._getUser();
+		if (response.isOk) {
+			return GithubUser(name: response.body['name'], email: response.body['email']);
+		}
+		throw GithubApiException.fromJson(response.body);
+	}
+
+	Future<List<GithubRepo>?> getRepos() async {
+		Response response = await _service._getRepos();
+		if (response.isOk) {
+			List<GithubRepo> repos = response.body!.map((entry) => GithubRepo.fromJson(entry)).toList();
+			return repos;
+		}
+		throw GithubApiException.fromJson(response.body);
+	}
+
+	Future<GithubRepo> createRepo({required String name, bool private = true}) async {
+		Response response = await _service._createRepo(name: name, private: private);
+		if (response.isOk) {
+			GithubRepo repo = GithubRepo.fromJson(response.body);
+			return repo;
+		}
+		throw GithubApiException.fromJson(response.body);
 	}
 
 }
