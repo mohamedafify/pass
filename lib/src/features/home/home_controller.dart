@@ -30,8 +30,15 @@ class HomeController extends GetxController {
 		}
 	}
 
-	void cloneRepo(GithubRepo repo) {
-		repo.clone();
+	Future<void> cloneRepo(GithubRepo repo) async {
+		isLoading.value = true;
+		bool cloned = await repo.clone();
+		if (cloned) {
+			Get.snackbar('Success', 'Cloned repo :)');
+		} else {
+			Get.snackbar('Error', 'Failed to clone :(');
+		}
+		isLoading.value = false;
 	}
 
 	Future<void> createNewRepo() async {

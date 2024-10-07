@@ -106,7 +106,7 @@ class Github {
 	Future<List<GithubRepo>?> getRepos() async {
 		Response response = await _service._getRepos();
 		if (response.isOk) {
-			List<GithubRepo> repos = response.body!.map((entry) => GithubRepo.fromJson(entry)).toList();
+			List<GithubRepo> repos = List<GithubRepo>.from(response.body!.map((entry) => GithubRepo.fromJson(entry, accessToken)).toList());
 			return repos;
 		}
 		throw GithubApiException.fromJson(response.body);
@@ -115,7 +115,7 @@ class Github {
 	Future<GithubRepo> createRepo({required String name, bool private = true}) async {
 		Response response = await _service._createRepo(name: name, private: private);
 		if (response.isOk) {
-			GithubRepo repo = GithubRepo.fromJson(response.body);
+			GithubRepo repo = GithubRepo.fromJson(response.body, accessToken);
 			return repo;
 		}
 		throw GithubApiException.fromJson(response.body);
