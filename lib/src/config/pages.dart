@@ -17,5 +17,11 @@ class Pages {
 			binding: LoginBinding(),
 			transition: _transition
 		),
+		GetPage(
+			name: Routes.fileViewer,
+			page: () => const FileViewerScreen(),
+			binding: FileViewerBinding(),
+			transition: _transition
+		),
 	];
 }

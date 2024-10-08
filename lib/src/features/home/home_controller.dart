@@ -32,13 +32,18 @@ class HomeController extends GetxController {
 
 	Future<void> cloneRepo(GithubRepo repo) async {
 		isLoading.value = true;
-		bool cloned = await repo.clone();
-		if (cloned) {
-			Get.snackbar('Success', 'Cloned repo :)');
-		} else {
+		try {
+			bool cloned = await repo.clone();
+			if (cloned) {
+				Get.toNamed(Routes.fileViewer);
+			} else {
+				Get.snackbar('Error', 'Failed to clone :(');
+			}
+		} catch (error) {
 			Get.snackbar('Error', 'Failed to clone :(');
+		} finally {
+			isLoading.value = false;
 		}
-		isLoading.value = false;
 	}
 
 	Future<void> createNewRepo() async {
@@ -56,8 +61,8 @@ class HomeController extends GetxController {
 		isLoading.value = true;
 		try {
 			GithubRepo? repo = await github!.createRepo(name: newRepoName);
+			await cloneRepo(repo);
 			isLoading.value = false;
-			inspect(repo);
 		} on GithubApiException catch (error) {
 			isLoading.value = false;
  			Get.snackbar(error.message, error.errors[0].message);

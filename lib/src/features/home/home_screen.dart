@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:passwordstore/src/config/routes.dart';
 
 import 'package:passwordstore/src/constants/constants.dart';
 import 'package:passwordstore/src/features/github/github.dart';
