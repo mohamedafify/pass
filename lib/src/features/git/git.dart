@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'repo.dart';
@@ -57,11 +58,12 @@ class Git {
 		}
 	}
 
-	Future<bool> clone(String repoUrl, String clonePath) async {
+	Future<bool> clone(String repoUrl, String clonePath, String token) async {
 		try {
 			await _channel.invokeMethod('clone', {
 				'repoUrl': repoUrl,
 				'clonePath': clonePath,
+				'token': token,
 			});
 			return true;
 		} on PlatformException catch (e) {

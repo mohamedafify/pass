@@ -56,9 +56,10 @@ class MainActivity : FlutterFragmentActivity() {
 				"clone" -> {
 					val repoUrl = call.argument<String>("repoUrl")
 					val clonePath = call.argument<String>("clonePath")
+					val token = call.argument<String>("token")
 					if (repoUrl != null && clonePath != null) {
 						val gitService = GitService(clonePath)
-						gitService.cloneRepository(repoUrl, clonePath, result) // Pass the result to handle responses
+						gitService.cloneRepository(repoUrl, clonePath, result, token)
 					} else {
 						result.error("INVALID_ARGUMENTS", "Repository URL or clone path is null", null)
 					}

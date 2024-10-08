@@ -12,22 +12,24 @@ class GithubRepo extends GitRepo {
 		required this.htmlUrl,
 		required this.sshUrl,
 		required super.name,
-		required super.cloneUrl
+		required super.cloneUrl,
+		required super.token
 	});
 
 	static GithubRepo fromJson(Map<String, dynamic> json, String token) {
 		// append token to clone url
-		String url = json['clone_url'];
-		var arr = url.split('https://');
-		String cloneUrl = 'https://$token@${arr[1]}';
+// 		String url = json['clone_url'];
+// 		var arr = url.split('https://');
+// 		String cloneUrl = 'https://$token@${arr[1]}';
 
 		return GithubRepo(
 			name: json['name'],
 			private: json['private'],
 			apiUrl: json['url'],
 			htmlUrl: json['html_url'],
-			cloneUrl: cloneUrl,
+			cloneUrl: json['clone_url'],
 			sshUrl: json['ssh_url'],
+			token: token,
 		);
 	}
 }

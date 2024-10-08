@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 public class GitService {
 	private String repoPath;
@@ -67,12 +68,13 @@ public class GitService {
 		});
 	}
 
-	public void cloneRepository(String repoUrl, String clonePath, MethodChannel.Result result) {
+	public void cloneRepository(String repoUrl, String clonePath, MethodChannel.Result result, String token) {
 		executor.execute(() -> {
 			try {
 				Git.cloneRepository()
 					.setURI(repoUrl)
 					.setDirectory(new File(clonePath))
+					.setCredentialsProvider(new UsernamePasswordCredentialsProvider("oauth2", token))
 					.call();
 				result.success("Repository cloned successfully");
 			} catch (GitAPIException e) {

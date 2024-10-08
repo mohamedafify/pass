@@ -1,0 +1,4 @@
+adb devices > /dev/null 2>&1
+adb uninstall dev.afify.pass.passwordstore > /dev/null 2>&1
+flutter build apk --release
+adb install build/app/outputs/flutter-apk/app-release.apk
