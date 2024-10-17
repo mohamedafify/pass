@@ -1,5 +1,7 @@
 library login;
 
+import 'dart:convert';
+
 import 'package:passwordstore/src/constants/constants.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_storage/get_storage.dart';
@@ -127,12 +129,11 @@ Dialog _buildNewRepoName(BuildContext context) {
 				mainAxisSize: MainAxisSize.min,
 				children: [
 					Container(
-						padding: const EdgeInsets.all(kSpacing),
-						child: const Text("New repository Name"),
-					),
-					Container(
-						margin: const EdgeInsets.symmetric(horizontal: kSpacing),
+						margin: const EdgeInsets.fromLTRB(kSpacing, kSpacing, kSpacing, 0),
 						child: TextFormField(
+							decoration: const InputDecoration(
+								labelText: "New repository name",
+							),
 							autovalidateMode: AutovalidateMode.onUserInteraction,
 							validator: (value) {
 								if (value != null) { 

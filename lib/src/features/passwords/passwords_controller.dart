@@ -5,6 +5,7 @@ class PasswordsController extends GetxController {
 	final FileManagerController fileManager = FileManagerController();
 	Directory? passDirectory;
 	RxBool showBack = false.obs;
+	TextEditingController searchController = TextEditingController();
 
 	@override
 	onInit() async {
@@ -12,14 +13,22 @@ class PasswordsController extends GetxController {
 
 		Directory? storageDirectory = await getExternalStorageDirectory();
 		if (storageDirectory != null) {
-			String repoCloned = GetStorage().read('repoCloned');
-			passDirectory = Directory.fromUri(Uri.parse("${storageDirectory.path}/$repoCloned"));
-			if (await passDirectory!.exists()) {
-				WidgetsBinding.instance.addPostFrameCallback((_) {
-					fileManager.openDirectory(passDirectory!);
-				});
-			}
+			Github? github = await Github.getInstance();
+			if (github != null) {
+				GithubRepo repo = GithubRepo.fromJson(jsonDecode(GetStorage().read('repoCloned')));
+				passDirectory = Directory.fromUri(Uri.parse(repo.repoPath!));
+				if (await passDirectory!.exists()) {
+					WidgetsBinding.instance.addPostFrameCallback((_) {
+						fileManager.openDirectory(passDirectory!);
+					});
+				}
+			}	
 		}
+	}
+
+	void clearSearch() {
+		searchController.clear();
+		FocusScope.of(Get.context!).unfocus();
 	}
 
 	void handleBack() async {
@@ -34,6 +43,7 @@ class PasswordsController extends GetxController {
 			updateBackButton();
 		} else if (FileManager.isFile(entry)) {
 			String ext = FileManager.getFileExtension(entry);
+			
 			if (ext == 'gpg') {
 				SettingsController settings = Get.find<SettingsController>();
 				if (settings.publicKey == null) {

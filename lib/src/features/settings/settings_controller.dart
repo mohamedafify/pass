@@ -46,7 +46,11 @@ class SettingsController extends GetxController {
 			String tempPrivateKey = await privatekeyFile.readAsString();
 			bool isValid = GPG.validatePrivateKey(tempPrivateKey);
 			if (isValid) {
-				String? passphrase = await showDialog(context: Get.context!, builder: _buildSetPrivateKeyPassphrase);
+				String? passphrase = await showDialog(
+					barrierDismissible: false,
+					context: Get.context!,
+					builder: _buildSetPrivateKeyPassphrase
+				);
 				if (passphrase != null) {
 					privateKeyPassphrase = passphrase;
 					GetStorage().write('privateKeyPassphrase', passphrase);
@@ -60,7 +64,7 @@ class SettingsController extends GetxController {
 		}
 	}
 
-	void wipe() async {
+	Future<void> wipe() async {
 		Directory? storageDirectory = await getExternalStorageDirectory();
 		if (storageDirectory != null) {
 			String? repoName = GetStorage().read('repoCloned');

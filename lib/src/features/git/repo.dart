@@ -4,8 +4,9 @@ class GitRepo {
 	String name;
 	String cloneUrl;
 	String token;
+	String? repoPath;
 
-	GitRepo({required this.name, required this.cloneUrl, required this.token});
+	GitRepo({required this.name, required this.cloneUrl, required this.token, this.repoPath});
 
 	Future<bool> clone() async {
 		Directory? storageDirectory = await getExternalStorageDirectory();
@@ -19,9 +20,22 @@ class GitRepo {
 			} else {
 				newRepoDirectory = await newRepoDirectory.create();
 			}
-			final git = Git();
-			bool cloned = await git.clone(cloneUrl, newRepoDirectory.path, token);
+			bool cloned = await Git.clone(cloneUrl, newRepoDirectory.path, token);
+			repoPath = newRepoDirectory.path;
 			return cloned;
+		} else {
+			throw Exception('Failed to get directory');
+		}
+	}
+
+	Future<bool> pull({ String branchName = 'main' }) async {
+		Directory? storageDirectory = await getExternalStorageDirectory();
+		if (storageDirectory != null) {
+			if (repoPath != null) {
+				return await Git.pull(branchName, token, repoPath!);
+			} else {
+				throw Exception("repo path is null");
+			}
 		} else {
 			throw Exception('Failed to get directory');
 		}

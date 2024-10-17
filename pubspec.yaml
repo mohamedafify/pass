@@ -47,6 +47,7 @@ dependencies:
   file_manager: ^1.0.2
   openpgp: ^3.8.2
   file_picker: ^8.0.0+1
+  workmanager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,5 @@
 library settings;
 
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -64,18 +63,17 @@ Dialog _buildSetPrivateKeyPassphrase(BuildContext context) {
 				mainAxisSize: MainAxisSize.min,
 				children: [
 					Container(
-						padding: const EdgeInsets.all(kSpacing),
-						child: const Text("Private key passphrase"),
-					),
-					Container(
-						margin: const EdgeInsets.symmetric(horizontal: kSpacing),
+						margin: const EdgeInsets.fromLTRB(kSpacing, kSpacing, kSpacing, 0),
 						child: TextFormField(
+							decoration: const InputDecoration(
+								labelText: "Passphrase",
+							),
 							autovalidateMode: AutovalidateMode.onUserInteraction,
 							validator: (value) {
 								if (value != null) { 
-									return value.isEmpty ? "Fill data" : null;
+									return value.isEmpty ? "Required" : null;
 								} else {
-									return "Fill data";
+									return "Required";
 								}
 							},
 							controller: newRepoController,

@@ -1,5 +1,6 @@
 library github;
 
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_appauth/flutter_appauth.dart';
@@ -41,26 +42,26 @@ class Github {
 		if (token != null) {
 			print('token: $token');
 			instance._service = GithubService(accessToken: token);
-			print('validation token...');
-			bool isValidToken = await instance._service._hasValidToken();
-			if (isValidToken) {
-				print('token is valid');
-				instance.accessToken = token;
-				return instance;
-			} else {
-				print('token is Not valid, reauthenticating');
-				String? token = await _authenticate();
-				if (token != null) {
-					print('token: $token');
-					await GetStorage().write(githubTokenKey, token);
-					instance.accessToken = token;
-					instance._service.accessToken = token;
-					return instance;
-				}
-				return null;
-			}
+// 			print('validation token...');
+// 			bool isValidToken = await instance._service._hasValidToken();
+// 			if (isValidToken) {
+// 				print('token is valid');
+			instance.accessToken = token;
+			return instance;
+// 			} else {
+// 				print('token is Not valid, reauthenticating');
+// 				String? token = await _authenticate();
+// 				if (token != null) {
+// 					print('token: $token');
+// 					await GetStorage().write(githubTokenKey, token);
+// 					instance.accessToken = token;
+// 					instance._service.accessToken = token;
+// 					return instance;
+// 				}
+// 				return null;
+// 			}
 		} else {
-			print('token is not found, reauthenticating...');
+			print('token is not found, authenticating...');
 			String? token = await _authenticate();
 			if (token != null) {
 				print('token: $token');
@@ -106,7 +107,7 @@ class Github {
 	Future<List<GithubRepo>?> getRepos() async {
 		Response response = await _service._getRepos();
 		if (response.isOk) {
-			List<GithubRepo> repos = List<GithubRepo>.from(response.body!.map((entry) => GithubRepo.fromJson(entry, accessToken)).toList());
+			List<GithubRepo> repos = List<GithubRepo>.from(response.body!.map((entry) => GithubRepo.fromJson(entry, token: accessToken)).toList());
 			return repos;
 		}
 		throw GithubApiException.fromJson(response.body);
@@ -115,7 +116,7 @@ class Github {
 	Future<GithubRepo> createRepo({required String name, bool private = true}) async {
 		Response response = await _service._createRepo(name: name, private: private);
 		if (response.isOk) {
-			GithubRepo repo = GithubRepo.fromJson(response.body, accessToken);
+			GithubRepo repo = GithubRepo.fromJson(response.body, token: accessToken);
 			return repo;
 		}
 		throw GithubApiException.fromJson(response.body);

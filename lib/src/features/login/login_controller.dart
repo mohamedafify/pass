@@ -49,6 +49,10 @@ class LoginController extends GetxController {
 			if (github != null) {
 				String? repoCloned = GetStorage().read('repoCloned');
 				if (repoCloned != null) {
+					GithubRepo repo = GithubRepo.fromJson(jsonDecode(GetStorage().read('repoCloned')));
+					isLoading.value = true;
+					await repo.pull();
+					isLoading.value = false;
 					Get.offAllNamed(Routes.home);
 				} else {
 					await showRepos(github);
@@ -88,7 +92,7 @@ class LoginController extends GetxController {
 		try {
 			bool cloned = await repo.clone();
 			if (cloned) {
-				GetStorage().write('repoCloned', repo.name);
+				GetStorage().write('repoCloned', repo.toJson());
 				Get.offAllNamed(Routes.home);
 			} else {
 				Get.snackbar('Error', 'Failed to clone :(');

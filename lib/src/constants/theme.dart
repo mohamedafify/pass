@@ -13,6 +13,9 @@ final ThemeData githubTheme = ThemeData.from(
  		),
  	),
 	inputDecorationTheme: InputDecorationTheme(
+		labelStyle: const TextStyle(
+			color: Colors.grey,
+		),
 		contentPadding: const EdgeInsets.all(kSmallSpacing),
 		isCollapsed: true,
 		border: OutlineInputBorder(

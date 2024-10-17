@@ -12,53 +12,7 @@ part 'repo.dart';
 class Git {
 	static const MethodChannel _channel = MethodChannel('git_channel');
 
-	Future<bool> init(String repoPath) async {
-		try {
-			await _channel.invokeMethod('init', {'repoPath': repoPath});
-			return true;
-		} on PlatformException catch (e) {
-			print('Failed to initialize Git: ${e.message}');
-			return false;
-		}
-	}
-
-	Future<bool> pull(String remoteName, String branchName) async {
-		try {
-			await _channel.invokeMethod('pull', {
-				'remoteName': remoteName,
-				'branchName': branchName,
-			});
-			return true;
-		} on PlatformException catch (e) {
-			print('Failed to pull: ${e.message}');
-			return false;
-		}
-	}
-
-	Future<bool> push(String remoteName, String branchName) async {
-		try {
-			await _channel.invokeMethod('push', {
-				'remoteName': remoteName,
-				'branchName': branchName,
-			});
-			return true;
-		} on PlatformException catch (e) {
-			print('Failed to push: ${e.message}');
-			return false;
-		}
-	}
-
-	Future<bool> commit(String message) async {
-		try {
-			await _channel.invokeMethod('commit', {'message': message});
-			return true;
-		} on PlatformException catch (e) {
-			print('Failed to commit: ${e.message}');
-			return false;
-		}
-	}
-
-	Future<bool> clone(String repoUrl, String clonePath, String token) async {
+	static Future<bool> clone(String repoUrl, String clonePath, String token) async {
 		try {
 			await _channel.invokeMethod('clone', {
 				'repoUrl': repoUrl,
@@ -72,13 +26,43 @@ class Git {
 		}
 	}
 
-	Future<bool> addAll() async {
+	static Future<bool> pull(String branchName, String token, String path) async {
 		try {
-			await _channel.invokeMethod('addAll');
+			await _channel.invokeMethod('pull', {
+				'branchName': branchName,
+				'token': token,
+				'path': path,
+			});
 			return true;
 		} on PlatformException catch (e) {
-			print('Failed to add all changes: ${e.message}');
+			print('Failed to pull: ${e.message}');
 			return false;
 		}
 	}
+
+	/*
+	static Future<bool> push(String remoteName, String branchName) async {
+		try {
+			await _channel.invokeMethod('push', {
+				'remoteName': remoteName,
+				'branchName': branchName,
+			});
+			return true;
+		} on PlatformException catch (e) {
+			print('Failed to push: ${e.message}');
+			return false;
+		}
+	}
+
+	static Future<bool> commit(String message) async {
+		try {
+			await _channel.invokeMethod('commit', {'message': message});
+			return true;
+		} on PlatformException catch (e) {
+			print('Failed to commit: ${e.message}');
+			return false;
+		}
+	}
+	*/
+
 }

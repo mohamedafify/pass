@@ -10,4 +10,14 @@ class HomeController extends GetxController {
 		selectedIndex.value = index;
 	}
 
+	@override
+	onInit() async {
+		super.onInit();
+		Github? github = await Github.getInstance();
+
+		if (github != null) {
+			GithubRepo repo = GithubRepo.fromJson(jsonDecode(GetStorage().read('repoCloned')));
+		}
+	}
+
 }
