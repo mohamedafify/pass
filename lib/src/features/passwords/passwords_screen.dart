@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:file_manager/file_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -12,6 +11,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:passwordstore/src/constants/constants.dart';
 import 'package:passwordstore/src/features/github/github.dart';
 import 'package:passwordstore/src/features/gpg/gpg.dart';
+import 'package:passwordstore/src/features/home/home_screen.dart';
 import 'package:passwordstore/src/features/settings/settings_screen.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -23,51 +23,55 @@ class PasswordsScreen extends GetView<PasswordsController> {
 
 	@override
 	Widget build(BuildContext context) {
-		return SafeArea(
-			child: Scaffold(
-				appBar: PreferredSize(
-					preferredSize: const Size(double.infinity, 60),
-					child: Container(
-						margin: const EdgeInsets.fromLTRB(kSpacing, 0, kSpacing, 0),
-						child: Row(
-							children: [
-								Obx(() => controller.showBack.value ?  IconButton(
-									padding: EdgeInsets.zero,
-									icon: const Icon(Icons.arrow_back),
-									onPressed: controller.handleBack,
-								) : Container()),
-// 								Expanded(child:SearchBar(
-// 									controller: controller.searchController,
-// 									leading: const Icon(Icons.search),
-// 									trailing: [
-// 										IconButton(
-// 											padding: EdgeInsets.zero,
-// 											onPressed: controller.clearSearch,
-// 											icon: const Icon(Icons.close)
-// 										)
-// 									],
-// 									shape: MaterialStatePropertyAll(RoundedRectangleBorder(
-// 										borderRadius: BorderRadius.circular(kSpacing)
-// 									)),
-// 								)),
-							],
-						)
+		return PopScope(
+			canPop: false,
+			onPopInvoked: ((didPop) {
+				final homeController = Get.find<HomeController>();
+				// disable backing from settings page
+				homeController.selectedIndex.value == 0 &&
+					controller.showBack.value ? controller.handleBack() : null; 
+			}) ,
+			child: SafeArea(
+				child: Scaffold(
+					appBar: PreferredSize(
+						preferredSize: const Size(double.infinity, 50),
+						child: Container(
+							margin: const EdgeInsets.fromLTRB(kSpacing, 0, kSpacing, 0),
+							child: Row(
+								children: [
+									Obx(() => controller.showBack.value ?  IconButton(
+										padding: EdgeInsets.zero,
+										icon: const Icon(Icons.arrow_back),
+										onPressed: controller.handleBack,
+									) : Container()),
+									Expanded(child:SearchBar(
+										controller: controller.searchController,
+										onChanged: controller.search,
+										leading: const Icon(Icons.search),
+										trailing: [
+											IconButton(
+												padding: EdgeInsets.zero,
+												onPressed: controller.clearSearch,
+												icon: const Icon(Icons.close)
+											)
+										],
+										shape: MaterialStatePropertyAll(RoundedRectangleBorder(
+											borderRadius: BorderRadius.circular(kSpacing)
+										)),
+									)),
+								],
+							)
+						),
 					),
-				),
-				body: Container(
-					padding: const EdgeInsets.symmetric(horizontal: kSpacing),
-					child: FileManager(
-						controller: controller.fileManager,
-						builder: (context, snapshot) {
-							final List<FileSystemEntity> entities = snapshot;
-							return ListView.builder(
-								itemCount: entities.length,
-								shrinkWrap: true,
-								itemBuilder: (BuildContext context, int index) => _buildPassword(entities, index),
-							);
-						},
-					)
-				),
+					body: Container(
+						padding: const EdgeInsets.symmetric(horizontal: kSpacing),
+						child: Obx(()=>ListView.builder(
+							itemCount: controller.currentDirectory.value.length,
+							shrinkWrap: true,
+							itemBuilder: (BuildContext context, int index) => _buildPassword(controller.currentDirectory.value, index),
+						))
+					),
+				)
 			)
 		);
 	}
@@ -76,6 +80,7 @@ class PasswordsScreen extends GetView<PasswordsController> {
 		String item = path.basenameWithoutExtension(entities[index].path);
 		return Card(
 			child: ListTile(
+				leading: (entities[index] is Directory) ? const Icon(Icons.folder) : const Icon(Icons.password),
 				shape: RoundedRectangleBorder(
 					borderRadius: BorderRadius.circular(kBorderRadius)
 				),

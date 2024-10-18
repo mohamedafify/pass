@@ -28,11 +28,11 @@ class GitRepo {
 		}
 	}
 
-	Future<bool> pull({ String branchName = 'main' }) async {
+	Future<void> pull({ String branchName = 'main' }) async {
 		Directory? storageDirectory = await getExternalStorageDirectory();
 		if (storageDirectory != null) {
 			if (repoPath != null) {
-				return await Git.pull(branchName, token, repoPath!);
+				await Git.pull(branchName, token, repoPath!);
 			} else {
 				throw Exception("repo path is null");
 			}

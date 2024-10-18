@@ -1,10 +1,13 @@
 library settings;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:passwordstore/src/features/github/github.dart';
 import 'package:passwordstore/src/features/gpg/gpg.dart';
+import 'package:passwordstore/src/features/passwords/passwords_screen.dart';
 import 'package:path/path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:get_storage/get_storage.dart';
@@ -45,7 +48,7 @@ class SettingsScreen extends GetView<SettingsController> {
 								Obx(() =>  Icon(Icons.done, color: controller.privateKeySet.value ? Colors.green : Colors.grey)),
 							],
 						),
-// 						TextButton.icon(onPressed: () { controller.wipe(); }, icon: const Icon(Icons.delete), label: const Text('Delete all data')),
+ 						TextButton.icon(onPressed: controller.pull, icon: const Icon(Icons.sync), label: const Text('Get updates')),
 					]
 				)
 			)

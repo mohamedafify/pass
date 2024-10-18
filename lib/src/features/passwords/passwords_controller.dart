@@ -2,10 +2,12 @@ part of passwords;
 
 
 class PasswordsController extends GetxController {
-	final FileManagerController fileManager = FileManagerController();
 	Directory? passDirectory;
 	RxBool showBack = false.obs;
 	TextEditingController searchController = TextEditingController();
+	List<FileSystemEntity> rootDirectory = List<FileSystemEntity>.empty();
+	RxList<FileSystemEntity> currentDirectory = List<FileSystemEntity>.empty().obs;
+	RxString currentPath = "".obs;
 
 	@override
 	onInit() async {
@@ -18,32 +20,59 @@ class PasswordsController extends GetxController {
 				GithubRepo repo = GithubRepo.fromJson(jsonDecode(GetStorage().read('repoCloned')));
 				passDirectory = Directory.fromUri(Uri.parse(repo.repoPath!));
 				if (await passDirectory!.exists()) {
-					WidgetsBinding.instance.addPostFrameCallback((_) {
-						fileManager.openDirectory(passDirectory!);
-					});
+					currentDirectory.value = passDirectory!.listSync().where((element) { return !element.path.contains('.git'); }).toList();
+ 					rootDirectory = currentDirectory.value;
+					currentPath.value = passDirectory!.path;
 				}
-			}	
+			}
 		}
+	}
+
+	void search(String? text) async {
+		if (text == null || text.isEmpty) {
+			currentDirectory.value = rootDirectory;
+			return;
+		}
+
+		List<FileSystemEntity> result = [];
+		await for (FileSystemEntity entity in Stream.fromIterable(rootDirectory)) {
+			if (!entity.path.contains('.git') && entity.path.toLowerCase().contains(text.toLowerCase())) {
+				result.add(entity);
+			}
+		}
+
+		currentDirectory.value = result;
 	}
 
 	void clearSearch() {
 		searchController.clear();
 		FocusScope.of(Get.context!).unfocus();
+		currentDirectory.value = rootDirectory;
 	}
 
 	void handleBack() async {
-		await fileManager.goToParentDirectory();
+		if (searchController.text.isNotEmpty) {
+			search(searchController.text);
+		}
+		openDirectory(Directory(currentPath.value).parent);
 		updateBackButton();
 	}
 
+	String getFileExtension(FileSystemEntity file) {
+		return file.path.split("/").last.split('.').last;
+	}
+
+	void openDirectory(Directory directory) {
+		currentDirectory.value = directory.listSync().where((element) { return !element.path.contains('.git'); }).toList();
+		currentPath.value = directory.path;
+	}
+
 	Future<void> handleOpenFile(FileSystemEntity entry) async {
-		if (FileManager.isDirectory(entry)) {
-			fileManager.openDirectory(entry);
-			fileManager.setCurrentPath = entry.path;
+		if (entry is Directory) {
+			openDirectory(entry);
 			updateBackButton();
-		} else if (FileManager.isFile(entry)) {
-			String ext = FileManager.getFileExtension(entry);
-			
+		} else if (entry is File) {
+			String ext = getFileExtension(entry);
 			if (ext == 'gpg') {
 				SettingsController settings = Get.find<SettingsController>();
 				if (settings.publicKey == null) {
@@ -74,7 +103,7 @@ class PasswordsController extends GetxController {
 	}
 
 	void updateBackButton() {
-		showBack.value = fileManager.getCurrentPath != passDirectory!.path;
+		showBack.value = currentPath.value != passDirectory!.path;
 	}
 
 }

@@ -78,4 +78,17 @@ class SettingsController extends GetxController {
 		}
 		GetStorage().erase();
 	}
+
+	Future<void> pull() async {
+		PasswordsController passwordsController = Get.find<PasswordsController>();
+		GithubRepo repo = GithubRepo.fromJson(jsonDecode(GetStorage().read('repoCloned')));
+		try {
+			await repo.pull();
+			// update passwords for new updates
+			passwordsController.currentDirectory.refresh();
+			Get.snackbar('Success', 'pulled latest updates :)');
+		} catch(error) {
+			Get.snackbar('Failed', 'error happend while pulling ${error.toString()}');
+		}
+	}
 }
