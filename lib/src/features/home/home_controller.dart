@@ -10,4 +10,9 @@ class HomeController extends GetxController {
 		selectedIndex.value = index;
 	}
 
+	void addNewPassword() {
+		final password = Get.find<PasswordsController>();
+		password.addNewPassword();
+	}
+
 }

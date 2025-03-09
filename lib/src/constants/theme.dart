@@ -17,7 +17,7 @@ final ThemeData githubTheme = ThemeData.from(
 			color: Colors.grey,
 		),
 		contentPadding: const EdgeInsets.all(kSmallSpacing),
-		isCollapsed: true,
+// 		isCollapsed: true,
 		border: OutlineInputBorder(
 			borderRadius: BorderRadius.circular(kBorderRadius)
 		),

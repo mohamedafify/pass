@@ -1,6 +1,5 @@
 part of passwords;
 
-
 class PasswordsController extends GetxController {
 	Directory? passDirectory;
 	RxBool showBack = false.obs;
@@ -8,6 +7,10 @@ class PasswordsController extends GetxController {
 	List<FileSystemEntity> rootDirectory = List<FileSystemEntity>.empty();
 	RxList<FileSystemEntity> currentDirectory = List<FileSystemEntity>.empty().obs;
 	RxString currentPath = "".obs;
+	GlobalKey<FormState> newPasswordFormKey = GlobalKey<FormState>();
+	TextEditingController newPasswordController = TextEditingController();
+	TextEditingController newUsernameController = TextEditingController();
+	TextEditingController newPathController = TextEditingController();
 
 	@override
 	onInit() async {
@@ -21,27 +24,34 @@ class PasswordsController extends GetxController {
 				passDirectory = Directory.fromUri(Uri.parse(repo.repoPath!));
 				if (await passDirectory!.exists()) {
 					currentDirectory.value = passDirectory!.listSync().where((element) { return !element.path.contains('.git'); }).toList();
- 					rootDirectory = currentDirectory.value;
+					rootDirectory = currentDirectory.value;
 					currentPath.value = passDirectory!.path;
 				}
 			}
 		}
 	}
 
-	void search(String? text) async {
-		if (text == null || text.isEmpty) {
+	void search(String searchString) async {
+		if (searchString.isEmpty) {
 			currentDirectory.value = rootDirectory;
 			return;
 		}
 
-		List<FileSystemEntity> result = [];
-		await for (FileSystemEntity entity in Stream.fromIterable(rootDirectory)) {
-			if (!entity.path.contains('.git') && entity.path.toLowerCase().contains(text.toLowerCase())) {
-				result.add(entity);
+		final directory = passDirectory;
+		final List<FileSystemEntity> matchingEntities = [];
+
+		// Convert searchString to lowercase for case-insensitive search
+		final searchLower = searchString.toLowerCase();
+
+		await for (var entity in directory!.list(recursive: true, followLinks: false)) {
+			final entityName = entity.uri.pathSegments.last.toLowerCase();
+
+			if (!entity.path.contains('.git') && entityName.contains(searchLower)) {
+				matchingEntities.add(entity);
 			}
 		}
 
-		currentDirectory.value = result;
+		currentDirectory.value = matchingEntities;
 	}
 
 	void clearSearch() {
@@ -93,10 +103,10 @@ class PasswordsController extends GetxController {
 					privatekey: settings.privateKey!,
 				);
 				try {
- 					String password = await gpg.decryptFile(file: entry);
- 					showDialog(context: Get.context!, builder: (context) => _buildDecryptedPassword(password));
+					String password = await gpg.decryptFile(file: entry);
+					showDialog(context: Get.context!, builder: (context) => _buildDecryptedPassword(password));
 				} catch (error) {
- 					Get.snackbar('GPG error', 'Please make sure you setup public and private key correctly with the passphrase');
+					Get.snackbar('GPG error', 'Please make sure you setup public and private key correctly with the passphrase');
 				}
 			}
 		}
@@ -106,4 +116,20 @@ class PasswordsController extends GetxController {
 		showBack.value = currentPath.value != passDirectory!.path;
 	}
 
+	void addNewPassword() {
+		final settings = Get.find<SettingsController>();
+		if (settings.publicKey == null) {
+			Get.snackbar('GPG error', 'Please set your public key before adding new passwords');
+			return;
+		}
+
+		Get.to(const NewPasswordScreen());
+	}
+
+
+	String generatePassword({int length = 15}) {
+		const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*()-_=+';
+		Random random = Random.secure();
+		return List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
+	}
 }

@@ -6,6 +6,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:math';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:passwordstore/src/constants/constants.dart';
@@ -17,6 +19,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 part 'passwords_controller.dart';
+part 'new_password_screen.dart';
 
 class PasswordsScreen extends GetView<PasswordsController> {
 	const PasswordsScreen({Key? key}) : super(key: key);
@@ -77,10 +80,11 @@ class PasswordsScreen extends GetView<PasswordsController> {
 	}
 
 	Widget _buildPassword(List<FileSystemEntity> entities, int index) {
-		String item = path.basenameWithoutExtension(entities[index].path);
+		bool isDirectory = entities[index] is Directory;
+		String item = isDirectory ? path.basename(entities[index].path) : path.basenameWithoutExtension(entities[index].path);
 		return Card(
 			child: ListTile(
-				leading: (entities[index] is Directory) ? const Icon(Icons.folder) : const Icon(Icons.password),
+				leading: isDirectory ? const Icon(Icons.folder) : const Icon(Icons.password),
 				shape: RoundedRectangleBorder(
 					borderRadius: BorderRadius.circular(kBorderRadius)
 				),
